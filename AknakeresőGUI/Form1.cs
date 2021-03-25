@@ -41,9 +41,9 @@ namespace AknakeresőGUI
 
                 flagsdispaly = new Label();
                 flagsdispaly.Size = new Size(length * 3, length);
-                flagsdispaly.Location = new Point(3*length, 0);
+                flagsdispaly.Location = new Point(3 * length, 0);
                 form.Controls.Add(flagsdispaly);
-                
+
                 plength = length;
                 this.rows = rows;
                 this.collums = collums;
@@ -66,7 +66,7 @@ namespace AknakeresőGUI
                     int r2 = r.Next(collums);
                     if (!bombpositions.Any(x => x.Equals((r1, r2))))
                     {
-                        bombpositions.Add((r1,r2));
+                        bombpositions.Add((r1, r2));
                         fields[r1, r2].isbomb = true;
                     }
                     else
@@ -88,7 +88,7 @@ namespace AknakeresőGUI
                 for (int i = 0; i < rows; i++)
                 {
                     for (int j = 0; j < collums; j++)
-                    {      
+                    {
                         for (int x = 0; x < 8; x++)
                         {
                             (int, int) newpos = (i + a[x].Item1, j + a[x].Item2);
@@ -144,7 +144,7 @@ namespace AknakeresőGUI
             }
             public void Check()
             {
-                int sum=0;
+                int sum = 0;
                 for (int i = 0; i < rows; i++)
                 {
                     for (int j = 0; j < collums; j++)
@@ -165,7 +165,7 @@ namespace AknakeresőGUI
             public int numberofnearbybombs;
             public Game game;
 
-            public Field(Game g, Form1 form, int i,int j)
+            public Field(Game g, Form1 form, int i, int j)
             {
                 isflagged = false;
                 isopened = false;
@@ -175,7 +175,7 @@ namespace AknakeresőGUI
                 pb.Size = new Size(game.plength, game.plength);
                 pb.SizeMode = PictureBoxSizeMode.Zoom;
                 pb.Image = new Bitmap("notopened.png");
-                pb.Location = new Point(j * game.plength, i * game.plength+ +game.plength);
+                pb.Location = new Point(j * game.plength, i * game.plength + +game.plength);
                 pb.BorderStyle = BorderStyle.FixedSingle;
                 pb.MouseClick += Click;
                 form.Controls.Add(pb);
@@ -244,7 +244,7 @@ namespace AknakeresőGUI
                         pb.Image = new Bitmap("notopened.png");
                         game.numberofflags++;
                     }
-                    else if (game.numberofflags>0)
+                    else if (game.numberofflags > 0)
                     {
                         this.isflagged = true;
                         pb.Image = new Bitmap("flagged.png");
@@ -253,12 +253,30 @@ namespace AknakeresőGUI
                 }
                 game.flagsdispaly.Text = game.numberofflags.ToString();
             }
-            
+
         }
         private void button1_Click(object sender, EventArgs e)
         {
-            button1.Dispose();
-            new Game(this, 10, 10, 3, 70);
+            int input1;
+            int input2;
+            int input3;
+            if (int.TryParse(in1.Text, out input1) && !(input1 < 4))
+            {
+                if (int.TryParse(in2.Text, out input2) && !(input2 < 4))
+                {
+                    if (int.TryParse(in3.Text, out input3) && !(input3 < 4))
+                    {
+                        in1.Dispose();
+                        in2.Dispose();
+                        in3.Dispose();
+                        button1.Dispose();
+                        new Game(this, input1, input2, input3, 50);
+                    }
+                    else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
+                }
+                else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
+            }
+            else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
         }
     }
 }
