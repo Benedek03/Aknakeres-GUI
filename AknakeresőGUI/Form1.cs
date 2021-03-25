@@ -132,6 +132,16 @@ namespace AknakeresőGUI
                 }
                 else
                 {
+                    for (int i = 0; i < rows; i++)
+                    {
+                        for (int j = 0; j < collums; j++)
+                        {
+                            if(fields[i, j].isbomb)
+                            {
+                                fields[i, j].pb.Image = new Bitmap("bomb.png");
+                            }
+                        }
+                    }
                     MessageBox.Show("vesztettél");
                 }
                 for (int i = 0; i < rows; i++)
@@ -215,12 +225,16 @@ namespace AknakeresőGUI
                     if (this.numberofnearbybombs == 0)
                     {
                         List<(int, int)> a = new List<(int, int)>{
+                            (-1,-1 ),
                             (-1, 0 ),
+                            (-1,+1 ),
                             ( 0,+1 ),
+                            (+1,+1 ),
                             (+1, 0 ),
+                            (+1,-1 ),
                             ( 0,-1 )
                             };
-                        for (int x = 0; x < 4; x++)
+                        for (int x = 0; x < 8; x++)
                         {
                             (int, int) newpos = (position.Item1 + a[x].Item1, position.Item2 + a[x].Item2);
                             if (newpos.Item1 > -1 && newpos.Item1 < game.rows &&
