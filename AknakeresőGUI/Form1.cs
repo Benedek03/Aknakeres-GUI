@@ -19,12 +19,28 @@ namespace AknakeresőGUI
         }
         class Game
         {
-            private Field[,] fields;
+            public Field[,] fields;
             public int numberofflags;
-            
-            public Game(Form1 form, int rows, int collums, int numberofbombs)
+            public int rows;
+            public int collums;
+            public int plength;
+            public PictureBox newgamebutton;
+
+            public Game(Form1 form, int rows, int collums, int numberofbombs, int length)
             {
-                form.Size = new Size(collums * 50 + 16, rows * 50 + 39);
+                newgamebutton = new PictureBox();
+                newgamebutton.Location = new Point(0, 0);
+                newgamebutton.Size = new Size(length * 3, length);
+                newgamebutton.SizeMode = PictureBoxSizeMode.Zoom;
+                newgamebutton.Image = new Bitmap("bomb.png");
+                newgamebutton.Click += Newgamebuttonclick;
+                form.Controls.Add(newgamebutton);
+                
+                plength = length;
+                this.rows = rows;
+                this.collums = collums;
+
+                form.Size = new Size(collums * length + 16, rows * length + 39 + length);
                 fields = new Field[rows, collums];
                 for (int i = 0; i < rows; i++)
                 {
@@ -51,11 +67,7 @@ namespace AknakeresőGUI
                     }
                 }
 
-                for (int i = 0; i < rows; i++)
-                {
-                    for (int j = 0; j < collums; j++)
-                    {
-                        List<(int, int)> a = new List<(int, int)>{
+                List<(int, int)> a = new List<(int, int)>{
                             (-1,-1 ),
                             (-1, 0 ),
                             (-1,+1 ),
@@ -65,6 +77,10 @@ namespace AknakeresőGUI
                             (+1,-1 ),
                             ( 0,-1 )
                             };
+                for (int i = 0; i < rows; i++)
+                {
+                    for (int j = 0; j < collums; j++)
+                    {      
                         for (int x = 0; x < 8; x++)
                         {
                             (int, int) newpos = (i + a[x].Item1, j + a[x].Item2);
@@ -81,6 +97,7 @@ namespace AknakeresőGUI
 
 
 
+                /*debug
                 for (int i = 0; i < rows; i++)
                 {
                     for (int j = 0; j < collums; j++)
@@ -93,6 +110,28 @@ namespace AknakeresőGUI
                         {
                             fields[i, j].pb.Image = new Bitmap($"{fields[i, j].Numberofnearbybombs.ToString()}.png");
                         }
+                    }
+                }*/
+            }
+            public void Newgamebuttonclick(object sender, EventArgs e)
+            {
+                Application.Restart();
+            }
+            public void Over(bool won)
+            {
+                if (won)
+                {
+                    MessageBox.Show("nyert");
+                }
+                else
+                {
+                    MessageBox.Show("vesztett");
+                }
+                for (int i = 0; i < rows; i++)
+                {
+                    for (int j = 0; j < collums; j++)
+                    {
+                        fields[i, j].Removeclick();
                     }
                 }
             }
@@ -117,12 +156,12 @@ namespace AknakeresőGUI
                 game = g;
                 position = (i, j);
                 pb = new PictureBox();
-                pb.Size = new Size(50, 50);
+                pb.Size = new Size(game.plength, game.plength);
                 pb.SizeMode = PictureBoxSizeMode.Zoom;
                 pb.Image = new Bitmap("notopened.png");
-                pb.Location = new Point(j * 50, i * 50);
+                pb.Location = new Point(j * game.plength, i * game.plength+ +game.plength);
                 pb.BorderStyle = BorderStyle.FixedSingle;
-                pb.MouseClick += new MouseEventHandler(Click);
+                pb.MouseClick += Click;
                 form.Controls.Add(pb);
             }
             void Click(object sender, MouseEventArgs e)
@@ -137,9 +176,44 @@ namespace AknakeresőGUI
                         break;
                 }
             }
+            public void Removeclick()
+            {
+                pb.MouseClick -= Click;
+            }
             void Open()
             {
-                MessageBox.Show($"sor: {position.Item1}\toszlop{position.Item2}");
+                //MessageBox.Show($"sor: {position.Item1}\toszlop{position.Item2}");
+                this.isopened = true;
+                Removeclick();
+                if (this.isbomb)
+                { 
+                    pb.Image = new Bitmap("bomb.png");
+                    game.Over(false);
+                    return;
+                }
+                else
+                {
+                    pb.Image = new Bitmap($"{numberofnearbybombs.ToString()}.png");
+                }
+                if (this.numberofnearbybombs == 0)
+                {
+                    List<(int, int)> a = new List<(int, int)>{
+                            (-1, 0 ),
+                            ( 0,+1 ),
+                            (+1, 0 ),
+                            ( 0,-1 )
+                            };
+                    for (int x = 0; x < 4; x++)
+                    {
+                        (int, int) newpos = (position.Item1 + a[x].Item1, position.Item2 + a[x].Item2);
+                        if (newpos.Item1 > -1 && newpos.Item1 < game.rows &&
+                            newpos.Item2 > -1 && newpos.Item2 < game.collums &&
+                            !game.fields[newpos.Item1, newpos.Item2].isopened)
+                        {
+                            game.fields[newpos.Item1, newpos.Item2].Open();
+                        }
+                    }
+                }
             }
             void Flag()
             {
@@ -150,7 +224,7 @@ namespace AknakeresőGUI
         private void button1_Click(object sender, EventArgs e)
         {
             button1.Dispose();
-            new Game(this, 7, 10 ,10);
+            new Game(this, 6, 13, 10, 70);
         }
     }
 }
