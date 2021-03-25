@@ -21,20 +21,28 @@ namespace AknakeresőGUI
         {
             public Field[,] fields;
             public int numberofflags;
+            public int numberofbombs;
             public int rows;
             public int collums;
             public int plength;
-            public PictureBox newgamebutton;
+            public Label flagsdispaly;
+            public Button newgamebutton;
 
             public Game(Form1 form, int rows, int collums, int numberofbombs, int length)
             {
-                newgamebutton = new PictureBox();
+                this.numberofbombs = numberofbombs;
+
+                newgamebutton = new Button();
+                newgamebutton.Text = "New Game";
                 newgamebutton.Location = new Point(0, 0);
                 newgamebutton.Size = new Size(length * 3, length);
-                newgamebutton.SizeMode = PictureBoxSizeMode.Zoom;
-                newgamebutton.Image = new Bitmap("bomb.png");
                 newgamebutton.Click += Newgamebuttonclick;
                 form.Controls.Add(newgamebutton);
+
+                flagsdispaly = new Label();
+                flagsdispaly.Size = new Size(length * 3, length);
+                flagsdispaly.Location = new Point(3*length, 0);
+                form.Controls.Add(flagsdispaly);
                 
                 plength = length;
                 this.rows = rows;
@@ -59,7 +67,7 @@ namespace AknakeresőGUI
                     if (!bombpositions.Any(x => x.Equals((r1, r2))))
                     {
                         bombpositions.Add((r1,r2));
-                        fields[r1, r2].Isbomb = true;
+                        fields[r1, r2].isbomb = true;
                     }
                     else
                     {
@@ -86,16 +94,15 @@ namespace AknakeresőGUI
                             (int, int) newpos = (i + a[x].Item1, j + a[x].Item2);
                             if (newpos.Item1 > -1 && newpos.Item1 < rows &&
                                 newpos.Item2 > -1 && newpos.Item2 < collums &&
-                                fields[newpos.Item1, newpos.Item2].Isbomb)
+                                fields[newpos.Item1, newpos.Item2].isbomb)
                             {
-                                fields[i, j].Numberofnearbybombs++;
+                                fields[i, j].numberofnearbybombs++;
                             }
                         }
                     }
                 }
                 numberofflags = numberofbombs;
-
-
+                flagsdispaly.Text = numberofflags.ToString();
 
                 /*debug
                 for (int i = 0; i < rows; i++)
@@ -121,11 +128,11 @@ namespace AknakeresőGUI
             {
                 if (won)
                 {
-                    MessageBox.Show("nyert");
+                    MessageBox.Show("nyertél");
                 }
                 else
                 {
-                    MessageBox.Show("vesztett");
+                    MessageBox.Show("vesztettél");
                 }
                 for (int i = 0; i < rows; i++)
                 {
@@ -135,19 +142,28 @@ namespace AknakeresőGUI
                     }
                 }
             }
+            public void Check()
+            {
+                int sum=0;
+                for (int i = 0; i < rows; i++)
+                {
+                    for (int j = 0; j < collums; j++)
+                    {
+                        if (!fields[i, j].isopened) sum++;
+                    }
+                }
+                if (sum == numberofbombs) Over(true);
+            }
         }
         class Field
         {
             public PictureBox pb;
-            private (int, int) position;
-            private bool isbomb;
-            private bool isopened;
-            private bool isflagged;
-            private int numberofnearbybombs;
-            private Game game;
-
-            public bool Isbomb { get { return isbomb; } set { isbomb = value; } }
-            public int Numberofnearbybombs { get { return numberofnearbybombs; } set { numberofnearbybombs = value; } }
+            public (int, int) position;
+            public bool isbomb;
+            public bool isopened;
+            public bool isflagged;
+            public int numberofnearbybombs;
+            public Game game;
 
             public Field(Game g, Form1 form, int i,int j)
             {
@@ -182,49 +198,67 @@ namespace AknakeresőGUI
             }
             void Open()
             {
-                //MessageBox.Show($"sor: {position.Item1}\toszlop{position.Item2}");
-                this.isopened = true;
-                Removeclick();
-                if (this.isbomb)
-                { 
-                    pb.Image = new Bitmap("bomb.png");
-                    game.Over(false);
-                    return;
-                }
-                else
+                if (!isflagged)
                 {
-                    pb.Image = new Bitmap($"{numberofnearbybombs.ToString()}.png");
-                }
-                if (this.numberofnearbybombs == 0)
-                {
-                    List<(int, int)> a = new List<(int, int)>{
+                    this.isopened = true;
+                    Removeclick();
+                    if (this.isbomb)
+                    {
+                        pb.Image = new Bitmap("bomb.png");
+                        game.Over(false);
+                        return;
+                    }
+                    else
+                    {
+                        pb.Image = new Bitmap($"{numberofnearbybombs.ToString()}.png");
+                    }
+                    if (this.numberofnearbybombs == 0)
+                    {
+                        List<(int, int)> a = new List<(int, int)>{
                             (-1, 0 ),
                             ( 0,+1 ),
                             (+1, 0 ),
                             ( 0,-1 )
                             };
-                    for (int x = 0; x < 4; x++)
-                    {
-                        (int, int) newpos = (position.Item1 + a[x].Item1, position.Item2 + a[x].Item2);
-                        if (newpos.Item1 > -1 && newpos.Item1 < game.rows &&
-                            newpos.Item2 > -1 && newpos.Item2 < game.collums &&
-                            !game.fields[newpos.Item1, newpos.Item2].isopened)
+                        for (int x = 0; x < 4; x++)
                         {
-                            game.fields[newpos.Item1, newpos.Item2].Open();
+                            (int, int) newpos = (position.Item1 + a[x].Item1, position.Item2 + a[x].Item2);
+                            if (newpos.Item1 > -1 && newpos.Item1 < game.rows &&
+                                newpos.Item2 > -1 && newpos.Item2 < game.collums &&
+                                !game.fields[newpos.Item1, newpos.Item2].isopened)
+                            {
+                                game.fields[newpos.Item1, newpos.Item2].Open();
+                            }
                         }
                     }
+                    game.Check();
                 }
             }
             void Flag()
             {
-               
+                if (!this.isopened)
+                {
+                    if (isflagged)
+                    {
+                        this.isflagged = false;
+                        pb.Image = new Bitmap("notopened.png");
+                        game.numberofflags++;
+                    }
+                    else if (game.numberofflags>0)
+                    {
+                        this.isflagged = true;
+                        pb.Image = new Bitmap("flagged.png");
+                        game.numberofflags--;
+                    }
+                }
+                game.flagsdispaly.Text = game.numberofflags.ToString();
             }
             
         }
         private void button1_Click(object sender, EventArgs e)
         {
             button1.Dispose();
-            new Game(this, 6, 13, 10, 70);
+            new Game(this, 10, 10, 3, 70);
         }
     }
 }
