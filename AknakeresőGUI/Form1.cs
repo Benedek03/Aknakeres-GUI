@@ -17,10 +17,32 @@ namespace AknakeresőGUI
         {
             InitializeComponent();
         }
+        class Game
+        {
+            private Field[,] fields;
+            
+            public Game(Form1 form, int rows,int collums)
+            {
+                form.Size = new Size(collums * 50 + 16, rows * 50 + 39);
+                fields = new Field[rows, collums];
+                for (int i = 0; i < rows; i++)
+                {
+                    for (int j = 0; j < collums; j++)
+                    {
+                        fields[i, j] = new Field(form, i, j);
+                    }
+                }
+            }
+        }
         class Field
         {
-            public PictureBox pb;
-            public (int, int) position;
+            private PictureBox pb;
+            private (int, int) position;
+            private bool isbomb;
+            private bool isopened;
+            private bool isflagged;
+            private int numberofnearbybombs;
+            private Game game;
 
             public Field(Form1 form, int i,int j)
             {
@@ -32,32 +54,17 @@ namespace AknakeresőGUI
                 pb.BorderStyle = BorderStyle.FixedSingle;
                 pb.Click += new EventHandler(open);
                 form.Controls.Add(pb);
-                Thread.Sleep(10);
             }
             void open(object sender, EventArgs e)
             {
                 pb.BackColor = Color.Green;
-                MessageBox.Show($"{position.Item1} {position.Item2}");
-            }
-        }
-        Field[,] ketd;
-        void f(int s, int o)
-        {
-            this.Size = new Size(o * 50 + 16, s * 50 + 39);
-            ketd = new Field[s, o];
-            for (int i = 0; i < s; i++)
-            {
-                for (int j = 0; j < o; j++)
-                {
-                    Field item = ketd[i, j];
-                    item = new Field(this,i,j);
-                }
+                MessageBox.Show($"sor: {position.Item1}\toszlop{position.Item2}");
             }
         }
         private void button1_Click(object sender, EventArgs e)
         {
             button1.Dispose();
-            f(7, 10);
+            new Game(this, 7, 10);
         }
     }
 }
