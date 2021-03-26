@@ -231,16 +231,20 @@ namespace AknakeresőGUI
             int input1;
             int input2;
             int input3;
+            int input4;
             if (int.TryParse(in1.Text, out input1) && !(input1 < 4))
                 if (int.TryParse(in2.Text, out input2) && !(input2 < 4))
                     if (int.TryParse(in3.Text, out input3) && !(input3 < 4))
-                    {
-                        in1.Dispose();
-                        in2.Dispose();
-                        in3.Dispose();
-                        button1.Dispose();
-                        new Game(this, input1, input2, input3, 50);
-                    }
+                        if (int.TryParse(in4.Text, out input4) && !(input4 < 4))
+                        {   
+                            in1.Dispose();
+                            in2.Dispose();
+                            in3.Dispose();
+                            in4.Dispose();
+                            button1.Dispose();
+                            new Game(this, input1, input2, input3, input4);
+                        }
+                        else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
                     else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
                 else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
             else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");

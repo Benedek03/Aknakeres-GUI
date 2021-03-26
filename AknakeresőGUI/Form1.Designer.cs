@@ -34,13 +34,14 @@
             this.in1 = new System.Windows.Forms.TextBox();
             this.in2 = new System.Windows.Forms.TextBox();
             this.in3 = new System.Windows.Forms.TextBox();
+            this.in4 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(100, 0);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(90, 90);
+            this.button1.Size = new System.Drawing.Size(100, 120);
             this.button1.TabIndex = 0;
             this.button1.Text = "Start";
             this.button1.UseVisualStyleBackColor = true;
@@ -78,11 +79,21 @@
             this.in3.TabIndex = 4;
             this.in3.Text = "bombák";
             // 
+            // in4
+            // 
+            this.in4.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F);
+            this.in4.Location = new System.Drawing.Point(0, 90);
+            this.in4.Name = "in4";
+            this.in4.Size = new System.Drawing.Size(100, 30);
+            this.in4.TabIndex = 5;
+            this.in4.Text = "pixelhoszz";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(190, 90);
+            this.ClientSize = new System.Drawing.Size(200, 120);
+            this.Controls.Add(this.in4);
             this.Controls.Add(this.in3);
             this.Controls.Add(this.in2);
             this.Controls.Add(this.in1);
@@ -101,6 +112,7 @@
         private System.Windows.Forms.TextBox in1;
         private System.Windows.Forms.TextBox in2;
         private System.Windows.Forms.TextBox in3;
+        private System.Windows.Forms.TextBox in4;
     }
 }
 
