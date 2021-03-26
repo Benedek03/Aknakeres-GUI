@@ -24,173 +24,128 @@ namespace AknakeresőGUI
             public int numberofbombs;
             public int rows;
             public int collums;
-            public int plength;
+            public int pixellength;
             public Label flagsdispaly;
             public Button newgamebutton;
 
-            public Game(Form1 form, int rows, int collums, int numberofbombs, int length)
+            public Game(Form1 form, int rows, int collums, int numberofbombs, int pixellength)
             {
-                this.numberofbombs = numberofbombs;
-
-                newgamebutton = new Button();
-                newgamebutton.Text = "New Game";
-                newgamebutton.Location = new Point(0, 0);
-                newgamebutton.Size = new Size(length * 3, length);
-                newgamebutton.Click += Newgamebuttonclick;
-                form.Controls.Add(newgamebutton);
-
-                flagsdispaly = new Label();
-                flagsdispaly.Size = new Size(length * 3, length);
-                flagsdispaly.Location = new Point(3 * length, 0);
-                form.Controls.Add(flagsdispaly);
-
-                plength = length;
                 this.rows = rows;
                 this.collums = collums;
+                this.fields = new Field[this.rows, this.collums];
+                this.numberofbombs = numberofbombs;
+                this.numberofflags = this.numberofbombs;
+                this.pixellength = pixellength;
+                this.newgamebutton = new Button();
+                this.flagsdispaly = new Label();
 
-                form.Size = new Size(collums * length + 16, rows * length + 39 + length);
-                fields = new Field[rows, collums];
-                for (int i = 0; i < rows; i++)
-                {
-                    for (int j = 0; j < collums; j++)
-                    {
-                        fields[i, j] = new Field(this, form, i, j);
-                    }
-                }
+                form.Size = new Size(this.collums * this.pixellength + 16, this.rows * this.pixellength + 39 + this.pixellength);
+                for (int i = 0; i < this.rows; i++)
+                    for (int j = 0; j < this.collums; j++)
+                        this.fields[i, j] = new Field(this, form, new Position(i, j));
 
-                Random r = new Random();
-                List<(int, int)> bombpositions = new List<(int, int)>();
+                Random random = new Random();
+                List<Position> bombpositions = new List<Position>();
                 for (int i = 0; i < numberofbombs; i++)
                 {
-                    int r1 = r.Next(rows);
-                    int r2 = r.Next(collums);
-                    if (!bombpositions.Any(x => x.Equals((r1, r2))))
+                    int r1 = random.Next(rows);
+                    int r2 = random.Next(collums);
+                    if (!bombpositions.Any(x => x.Equals(new Position(r1, r2))))
                     {
-                        bombpositions.Add((r1, r2));
-                        fields[r1, r2].isbomb = true;
+                        this.fields[r1, r2].isbomb = true;
+                        bombpositions.Add(new Position(r1, r2));
                     }
-                    else
-                    {
-                        i -= 1;
-                    }
+                    else { i -= 1; }
                 }
-
-                List<(int, int)> a = new List<(int, int)>{
-                            (-1,-1 ),
-                            (-1, 0 ),
-                            (-1,+1 ),
-                            ( 0,+1 ),
-                            (+1,+1 ),
-                            (+1, 0 ),
-                            (+1,-1 ),
-                            ( 0,-1 )
-                            };
-                for (int i = 0; i < rows; i++)
-                {
-                    for (int j = 0; j < collums; j++)
-                    {
+                
+                List<Position> a = new List<Position>{
+                            new Position(-1,-1 ),
+                            new Position(-1, 0 ),
+                            new Position(-1,+1 ),
+                            new Position( 0,+1 ),
+                            new Position(+1,+1 ),
+                            new Position(+1, 0 ),
+                            new Position(+1,-1 ),
+                            new Position( 0,-1 )};
+                for (int i = 0; i < this.rows; i++)
+                    for (int j = 0; j < this.collums; j++)
                         for (int x = 0; x < 8; x++)
-                        {
-                            (int, int) newpos = (i + a[x].Item1, j + a[x].Item2);
-                            if (newpos.Item1 > -1 && newpos.Item1 < rows &&
-                                newpos.Item2 > -1 && newpos.Item2 < collums &&
-                                fields[newpos.Item1, newpos.Item2].isbomb)
+                        { 
+                            Position newpos = new Position(i + a[x].Row, j + a[x].Collum);
+                            if (newpos.Row > -1 && newpos.Row < this.rows &&
+                                newpos.Collum > -1 && newpos.Collum < this.collums &&
+                                this.fields[newpos.Row, newpos.Collum].isbomb)
                             {
-                                fields[i, j].numberofnearbybombs++;
+                                this.fields[i, j].numberofnearbybombs++;
                             }
                         }
-                    }
-                }
-                numberofflags = numberofbombs;
-                flagsdispaly.Text = numberofflags.ToString();
 
-                /*debug
-                for (int i = 0; i < rows; i++)
-                {
-                    for (int j = 0; j < collums; j++)
-                    {
-                        if (fields[i,j].Isbomb == true)
-                        {
-                            fields[i, j].pb.Image = new Bitmap("bomb.png");
-                        }
-                        else
-                        {
-                            fields[i, j].pb.Image = new Bitmap($"{fields[i, j].Numberofnearbybombs.ToString()}.png");
-                        }
-                    }
-                }*/
+                this.newgamebutton.Location = new Point(0, 0);
+                this.newgamebutton.Size = new Size(this.pixellength * 3, this.pixellength);
+                this.newgamebutton.Text = "New Game";
+                this.newgamebutton.Click += Newgamebuttonclick;
+                form.Controls.Add(this.newgamebutton);
+
+                this.flagsdispaly.Location = new Point(3 * this.pixellength, 0);
+                this.flagsdispaly.Size = new Size(this.pixellength * 3, this.pixellength);
+                this.flagsdispaly.Text = this.numberofflags.ToString();
+                form.Controls.Add(this.flagsdispaly);
             }
-            public void Newgamebuttonclick(object sender, EventArgs e)
-            {
-                Application.Restart();
-            }
+            public void Newgamebuttonclick(object sender, EventArgs e) => Application.Restart();
             public void Over(bool won)
             {
-                if (won)
-                {
-                    MessageBox.Show("nyertél");
-                }
+                if (won) MessageBox.Show("nyertél");
                 else
                 {
-                    for (int i = 0; i < rows; i++)
-                    {
-                        for (int j = 0; j < collums; j++)
-                        {
-                            if(fields[i, j].isbomb)
-                            {
-                                fields[i, j].pb.Image = new Bitmap("bomb.png");
-                            }
-                        }
-                    }
+                    for (int i = 0; i < this.rows; i++)
+                        for (int j = 0; j < this.collums; j++)
+                            if (this.fields[i, j].isbomb) this.fields[i, j].pb.Image = new Bitmap("bomb.png");
                     MessageBox.Show("vesztettél");
                 }
-                for (int i = 0; i < rows; i++)
-                {
-                    for (int j = 0; j < collums; j++)
-                    {
-                        fields[i, j].Removeclick();
-                    }
-                }
+
+                for (int i = 0; i < this.rows; i++)
+                    for (int j = 0; j < this.collums; j++)
+                        this.fields[i, j].Removeclick();
             }
             public void Check()
             {
                 int sum = 0;
-                for (int i = 0; i < rows; i++)
-                {
-                    for (int j = 0; j < collums; j++)
-                    {
-                        if (!fields[i, j].isopened) sum++;
-                    }
-                }
-                if (sum == numberofbombs) Over(true);
+                for (int i = 0; i < this.rows; i++)
+                    for (int j = 0; j < this.collums; j++)
+                        if (!this.fields[i, j].isopened) sum++;
+                if (sum == this.numberofbombs) Over(true);
             }
         }
         class Field
         {
             public PictureBox pb;
-            public (int, int) position;
+            public Position position;
             public bool isbomb;
             public bool isopened;
             public bool isflagged;
             public int numberofnearbybombs;
             public Game game;
 
-            public Field(Game g, Form1 form, int i, int j)
+            public Field(Game game, Form1 form, Position position)
             {
-                isflagged = false;
-                isopened = false;
-                game = g;
-                position = (i, j);
-                pb = new PictureBox();
-                pb.Size = new Size(game.plength, game.plength);
-                pb.SizeMode = PictureBoxSizeMode.Zoom;
-                pb.Image = new Bitmap("notopened.png");
-                pb.Location = new Point(j * game.plength, i * game.plength + +game.plength);
-                pb.BorderStyle = BorderStyle.FixedSingle;
-                pb.MouseClick += Click;
-                form.Controls.Add(pb);
+                this.game = game;
+                this.position = position;
+
+                this.isbomb = false;
+                this.isopened = false;
+                this.isflagged = false;
+                this.numberofnearbybombs = 0;
+
+                this.pb = new PictureBox();
+                this.pb.Location = new Point(this.position.Row * this.game.pixellength, this.position.Collum * this.game.pixellength + this.game.pixellength);
+                this.pb.Size = new Size(this.game.pixellength, this.game.pixellength);
+                this.pb.SizeMode = PictureBoxSizeMode.Zoom;
+                this.pb.Image = new Bitmap("notopened.png");
+                this.pb.BorderStyle = BorderStyle.FixedSingle;
+                this.pb.MouseClick += Click;
+                form.Controls.Add(this.pb);
             }
-            void Click(object sender, MouseEventArgs e)
+            public void Click(object sender, MouseEventArgs e)
             {
                 switch (e.Button)
                 {
@@ -202,72 +157,74 @@ namespace AknakeresőGUI
                         break;
                 }
             }
-            public void Removeclick()
+            public void Removeclick() => pb.MouseClick -= Click;
+            public void Open()
             {
-                pb.MouseClick -= Click;
-            }
-            void Open()
-            {
-                if (!isflagged)
+                if (this.isflagged) return;
+                
+                this.isopened = true;
+                this.Removeclick();
+                if (this.isbomb)
                 {
-                    this.isopened = true;
-                    Removeclick();
-                    if (this.isbomb)
+                    this.pb.Image = new Bitmap("bomb.png");
+                    this.game.Over(false);
+                    return;
+                }
+                else this.pb.Image = new Bitmap($"{this.numberofnearbybombs.ToString()}.png");
+                if (this.numberofnearbybombs == 0)
+                {
+                    List<Position> a = new List<Position>{
+                            new Position(-1,-1 ),
+                            new Position(-1, 0 ),
+                            new Position(-1,+1 ),
+                            new Position( 0,+1 ),
+                            new Position(+1,+1 ),
+                            new Position(+1, 0 ),
+                            new Position(+1,-1 ),
+                            new Position( 0,-1 )};
+                    for (int x = 0; x < 8; x++)
                     {
-                        pb.Image = new Bitmap("bomb.png");
-                        game.Over(false);
-                        return;
-                    }
-                    else
-                    {
-                        pb.Image = new Bitmap($"{numberofnearbybombs.ToString()}.png");
-                    }
-                    if (this.numberofnearbybombs == 0)
-                    {
-                        List<(int, int)> a = new List<(int, int)>{
-                            (-1,-1 ),
-                            (-1, 0 ),
-                            (-1,+1 ),
-                            ( 0,+1 ),
-                            (+1,+1 ),
-                            (+1, 0 ),
-                            (+1,-1 ),
-                            ( 0,-1 )
-                            };
-                        for (int x = 0; x < 8; x++)
+                        Position newpos = this.position + a[x];
+                        if (newpos.Row > -1 && newpos.Row < this.game.rows &&
+                            newpos.Collum > -1 && newpos.Collum < this.game.collums &&
+                            !this.game.fields[newpos.Row, newpos.Collum].isopened)
                         {
-                            (int, int) newpos = (position.Item1 + a[x].Item1, position.Item2 + a[x].Item2);
-                            if (newpos.Item1 > -1 && newpos.Item1 < game.rows &&
-                                newpos.Item2 > -1 && newpos.Item2 < game.collums &&
-                                !game.fields[newpos.Item1, newpos.Item2].isopened)
-                            {
-                                game.fields[newpos.Item1, newpos.Item2].Open();
-                            }
+                            this.game.fields[newpos.Row, newpos.Collum].Open();
                         }
                     }
-                    game.Check();
                 }
+                this.game.Check();
             }
-            void Flag()
+            public void Flag()
             {
                 if (!this.isopened)
                 {
-                    if (isflagged)
+                    if (this.isflagged)
                     {
                         this.isflagged = false;
-                        pb.Image = new Bitmap("notopened.png");
-                        game.numberofflags++;
+                        this.pb.Image = new Bitmap("notopened.png");
+                        this.game.numberofflags++;
                     }
-                    else if (game.numberofflags > 0)
+                    else if (this.game.numberofflags > 0)
                     {
                         this.isflagged = true;
-                        pb.Image = new Bitmap("flagged.png");
-                        game.numberofflags--;
+                        this.pb.Image = new Bitmap("flagged.png");
+                        this.game.numberofflags--;
                     }
+                    this.game.flagsdispaly.Text = this.game.numberofflags.ToString();
                 }
-                game.flagsdispaly.Text = game.numberofflags.ToString();
             }
-
+        }
+        class Position
+        {
+            public int Row;
+            public int Collum;
+            public Position(int r, int c)
+            {
+                this.Row = r;
+                this.Collum = c;
+            }
+            public static Position operator +(Position a, Position b) => new Position(a.Row + b.Row, a.Collum + b.Collum);
         }
         private void button1_Click(object sender, EventArgs e)
         {
@@ -275,9 +232,7 @@ namespace AknakeresőGUI
             int input2;
             int input3;
             if (int.TryParse(in1.Text, out input1) && !(input1 < 4))
-            {
                 if (int.TryParse(in2.Text, out input2) && !(input2 < 4))
-                {
                     if (int.TryParse(in3.Text, out input3) && !(input3 < 4))
                     {
                         in1.Dispose();
@@ -287,9 +242,7 @@ namespace AknakeresőGUI
                         new Game(this, input1, input2, input3, 50);
                     }
                     else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
-                }
                 else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
-            }
             else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
         }
     }
