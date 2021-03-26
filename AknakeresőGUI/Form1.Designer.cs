@@ -35,6 +35,7 @@
             this.in2 = new System.Windows.Forms.TextBox();
             this.in3 = new System.Windows.Forms.TextBox();
             this.in4 = new System.Windows.Forms.TextBox();
+            this.pre1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -88,11 +89,23 @@
             this.in4.TabIndex = 5;
             this.in4.Text = "pixelhoszz";
             // 
+            // pre1
+            // 
+            this.pre1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.pre1.Location = new System.Drawing.Point(0, 120);
+            this.pre1.Name = "pre1";
+            this.pre1.Size = new System.Drawing.Size(200, 30);
+            this.pre1.TabIndex = 6;
+            this.pre1.Text = "10sor 10oszlop 10bomba";
+            this.pre1.UseVisualStyleBackColor = true;
+            this.pre1.Click += new System.EventHandler(this.pre1_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(200, 120);
+            this.ClientSize = new System.Drawing.Size(200, 150);
+            this.Controls.Add(this.pre1);
             this.Controls.Add(this.in4);
             this.Controls.Add(this.in3);
             this.Controls.Add(this.in2);
@@ -113,6 +126,7 @@
         private System.Windows.Forms.TextBox in2;
         private System.Windows.Forms.TextBox in3;
         private System.Windows.Forms.TextBox in4;
+        private System.Windows.Forms.Button pre1;
     }
 }
 

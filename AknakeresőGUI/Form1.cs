@@ -27,6 +27,7 @@ namespace AknakeresőGUI
             public int pixellength;
             public Label flagsdispaly;
             public Button newgamebutton;
+            public bool firstmove;
 
             public Game(Form1 form, int rows, int collums, int numberofbombs, int pixellength)
             {
@@ -38,47 +39,12 @@ namespace AknakeresőGUI
                 this.pixellength = pixellength;
                 this.newgamebutton = new Button();
                 this.flagsdispaly = new Label();
+                this.firstmove = true;
 
                 form.Size = new Size(this.collums * this.pixellength + 16, this.rows * this.pixellength + 39 + this.pixellength);
                 for (int i = 0; i < this.rows; i++)
                     for (int j = 0; j < this.collums; j++)
                         this.fields[i, j] = new Field(this, form, new Position(i, j));
-
-                Random random = new Random();
-                List<Position> bombpositions = new List<Position>();
-                for (int i = 0; i < numberofbombs; i++)
-                {
-                    int r1 = random.Next(rows);
-                    int r2 = random.Next(collums);
-                    if (!bombpositions.Any(x => x.Equals(new Position(r1, r2))))
-                    {
-                        this.fields[r1, r2].isbomb = true;
-                        bombpositions.Add(new Position(r1, r2));
-                    }
-                    else { i -= 1; }
-                }
-                
-                List<Position> a = new List<Position>{
-                            new Position(-1,-1 ),
-                            new Position(-1, 0 ),
-                            new Position(-1,+1 ),
-                            new Position( 0,+1 ),
-                            new Position(+1,+1 ),
-                            new Position(+1, 0 ),
-                            new Position(+1,-1 ),
-                            new Position( 0,-1 )};
-                for (int i = 0; i < this.rows; i++)
-                    for (int j = 0; j < this.collums; j++)
-                        for (int x = 0; x < 8; x++)
-                        { 
-                            Position newpos = new Position(i + a[x].Row, j + a[x].Collum);
-                            if (newpos.Row > -1 && newpos.Row < this.rows &&
-                                newpos.Collum > -1 && newpos.Collum < this.collums &&
-                                this.fields[newpos.Row, newpos.Collum].isbomb)
-                            {
-                                this.fields[i, j].numberofnearbybombs++;
-                            }
-                        }
 
                 this.newgamebutton.Location = new Point(0, 0);
                 this.newgamebutton.Size = new Size(this.pixellength * 3, this.pixellength);
@@ -115,6 +81,45 @@ namespace AknakeresőGUI
                         if (!this.fields[i, j].isopened) sum++;
                 if (sum == this.numberofbombs) Over(true);
             }
+            public void Putdownbombs(Position nothere)
+            {
+                Random random = new Random();
+                List<Position> bombpositions = new List<Position>();
+                while (bombpositions.Count != numberofbombs)
+                {
+                    Position newpos = new Position(random.Next(rows), random.Next(collums));
+                    if (!bombpositions.Any(x => x.Row.Equals(newpos.Row)) && !bombpositions.Any(x => x.Row.Equals(newpos.Row)))
+                    {
+                        if (!(newpos.Row.Equals(nothere.Row) && newpos.Collum.Equals(nothere.Collum)))
+                        {
+                            this.fields[newpos.Row, newpos.Collum].isbomb = true;
+                            bombpositions.Add(newpos);
+                        }
+                    }
+                }
+
+                List<Position> a = new List<Position>{
+                            new Position(-1,-1 ),
+                            new Position(-1, 0 ),
+                            new Position(-1,+1 ),
+                            new Position( 0,+1 ),
+                            new Position(+1,+1 ),
+                            new Position(+1, 0 ),
+                            new Position(+1,-1 ),
+                            new Position( 0,-1 )};
+                for (int i = 0; i < this.rows; i++)
+                    for (int j = 0; j < this.collums; j++)
+                        for (int x = 0; x < 8; x++)
+                        {
+                            Position newpos = new Position(i + a[x].Row, j + a[x].Collum);
+                            if (newpos.Row > -1 && newpos.Row < this.rows &&
+                                newpos.Collum > -1 && newpos.Collum < this.collums &&
+                                this.fields[newpos.Row, newpos.Collum].isbomb)
+                            {
+                                this.fields[i, j].numberofnearbybombs++;
+                            }
+                        }
+            }
         }
         class Field
         {
@@ -150,10 +155,11 @@ namespace AknakeresőGUI
                 switch (e.Button)
                 {
                     case MouseButtons.Left:
-                        Open();
+                        if (!this.game.firstmove) this.Open();
+                        else { this.game.firstmove = false; this.game.Putdownbombs(this.position); this.Open(); }
                         break;
                     case MouseButtons.Right:
-                        Flag();
+                        this.Flag();
                         break;
                 }
             }
@@ -236,11 +242,12 @@ namespace AknakeresőGUI
                 if (int.TryParse(in2.Text, out input2) && !(input2 < 4))
                     if (int.TryParse(in3.Text, out input3) && !(input3 < 4))
                         if (int.TryParse(in4.Text, out input4) && !(input4 < 4))
-                        {   
+                        {
                             in1.Dispose();
                             in2.Dispose();
                             in3.Dispose();
                             in4.Dispose();
+                            pre1.Dispose();
                             button1.Dispose();
                             new Game(this, input1, input2, input3, input4);
                         }
@@ -248,6 +255,13 @@ namespace AknakeresőGUI
                     else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
                 else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
             else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
+        }
+        private void pre1_Click(object sender, EventArgs e)
+        {
+            in1.Text = "10";
+            in2.Text = "10";
+            in3.Text = "10";
+            in4.Text = "50";
         }
     }
 }
