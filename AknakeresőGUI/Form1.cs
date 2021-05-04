@@ -16,111 +16,12 @@ namespace AknakeresőGUI
         public Form1()
         {
             InitializeComponent();
+            this.Icon = Icon.FromHandle(new Bitmap("img/bomb.png").GetHicon());
+            this.Text = "Minesweeper";
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            New();
         }
-        class Game
-        {
-            public Field[,] fields;
-            public int numberofflags;
-            public int numberofbombs;
-            public int rows;
-            public int collums;
-            public int pixellength;
-            public Label flagsdispaly;
-            public Button newgamebutton;
-            public bool firstmove;
-
-            public Game(Form1 form, int rows, int collums, int numberofbombs, int pixellength)
-            {
-                this.rows = rows;
-                this.collums = collums;
-                this.fields = new Field[this.rows, this.collums];
-                this.numberofbombs = numberofbombs;
-                this.numberofflags = this.numberofbombs;
-                this.pixellength = pixellength;
-                this.newgamebutton = new Button();
-                this.flagsdispaly = new Label();
-                this.firstmove = true;
-
-                form.Size = new Size(this.collums * this.pixellength + 16, this.rows * this.pixellength + 39 + this.pixellength);
-                for (int i = 0; i < this.rows; i++)
-                    for (int j = 0; j < this.collums; j++)
-                        this.fields[i, j] = new Field(this, form, new Position(i, j));
-
-                this.newgamebutton.Location = new Point(0, 0);
-                this.newgamebutton.Size = new Size(this.pixellength * 3, this.pixellength);
-                this.newgamebutton.Text = "New Game";
-                this.newgamebutton.Click += Newgamebuttonclick;
-                form.Controls.Add(this.newgamebutton);
-
-                this.flagsdispaly.Location = new Point(3 * this.pixellength, 0);
-                this.flagsdispaly.Size = new Size(this.pixellength * 3, this.pixellength);
-                this.flagsdispaly.Text = this.numberofflags.ToString();
-                form.Controls.Add(this.flagsdispaly);
-            }
-            public void Newgamebuttonclick(object sender, EventArgs e) => Application.Restart();
-            public void Over(bool won)
-            {
-                if (won) MessageBox.Show("nyertél");
-                else
-                {
-                    for (int i = 0; i < this.rows; i++)
-                        for (int j = 0; j < this.collums; j++)
-                            if (this.fields[i, j].isbomb) this.fields[i, j].pb.Image = new Bitmap("bomb.png");
-                    MessageBox.Show("vesztettél");
-                }
-
-                for (int i = 0; i < this.rows; i++)
-                    for (int j = 0; j < this.collums; j++)
-                        this.fields[i, j].Removeclick();
-            }
-            public void Check()
-            {
-                int sum = 0;
-                for (int i = 0; i < this.rows; i++)
-                    for (int j = 0; j < this.collums; j++)
-                        if (!this.fields[i, j].isopened) sum++;
-                if (sum == this.numberofbombs) Over(true);
-            }
-            public void Putdownbombs(Position nothere)
-            {
-                Random random = new Random();
-                List<Position> bombpositions = new List<Position>();
-                while (bombpositions.Count != numberofbombs)
-                {
-                    Position newpos = new Position(random.Next(rows), random.Next(collums));
-                    if (!bombpositions.Any(x => x.Row.Equals(newpos.Row)) && !bombpositions.Any(x => x.Row.Equals(newpos.Row)))
-                    {
-                        if (!(newpos.Row.Equals(nothere.Row) && newpos.Collum.Equals(nothere.Collum)))
-                        {
-                            this.fields[newpos.Row, newpos.Collum].isbomb = true;
-                            bombpositions.Add(newpos);
-                        }
-                    }
-                }
-
-                List<Position> a = new List<Position>{
-                            new Position(-1,-1 ),
-                            new Position(-1, 0 ),
-                            new Position(-1,+1 ),
-                            new Position( 0,+1 ),
-                            new Position(+1,+1 ),
-                            new Position(+1, 0 ),
-                            new Position(+1,-1 ),
-                            new Position( 0,-1 )};
-                for (int i = 0; i < this.rows; i++)
-                    for (int j = 0; j < this.collums; j++)
-                        for (int x = 0; x < 8; x++)
-                        {
-                            Position newpos = new Position(i + a[x].Row, j + a[x].Collum);
-                            if (newpos.Row > -1 && newpos.Row < this.rows &&
-                                newpos.Collum > -1 && newpos.Collum < this.collums &&
-                                this.fields[newpos.Row, newpos.Collum].isbomb)
-                            {
-                                this.fields[i, j].numberofnearbybombs++;
-                            }
-                        }
-            }
-        }
+        public void New(){new Game(this);}
         class Field
         {
             public PictureBox pb;
@@ -142,10 +43,10 @@ namespace AknakeresőGUI
                 this.numberofnearbybombs = 0;
 
                 this.pb = new PictureBox();
-                this.pb.Location = new Point(this.position.Row * this.game.pixellength, this.position.Collum * this.game.pixellength + this.game.pixellength);
+                this.pb.Location = new Point(this.position.row * this.game.pixellength, this.position.collumn * this.game.pixellength + this.game.pixellength);
                 this.pb.Size = new Size(this.game.pixellength, this.game.pixellength);
                 this.pb.SizeMode = PictureBoxSizeMode.Zoom;
-                this.pb.Image = new Bitmap("notopened.png");
+                this.pb.Image = new Bitmap("img/notopened.png");
                 this.pb.BorderStyle = BorderStyle.FixedSingle;
                 this.pb.MouseClick += Click;
                 form.Controls.Add(this.pb);
@@ -172,11 +73,11 @@ namespace AknakeresőGUI
                 this.Removeclick();
                 if (this.isbomb)
                 {
-                    this.pb.Image = new Bitmap("bomb.png");
+                    this.pb.Image = new Bitmap("img/bomb.png");
                     this.game.Over(false);
                     return;
                 }
-                else this.pb.Image = new Bitmap($"{this.numberofnearbybombs.ToString()}.png");
+                else this.pb.Image = new Bitmap($"img/{this.numberofnearbybombs.ToString()}.png");
                 if (this.numberofnearbybombs == 0)
                 {
                     List<Position> a = new List<Position>{
@@ -191,11 +92,11 @@ namespace AknakeresőGUI
                     for (int x = 0; x < 8; x++)
                     {
                         Position newpos = this.position + a[x];
-                        if (newpos.Row > -1 && newpos.Row < this.game.rows &&
-                            newpos.Collum > -1 && newpos.Collum < this.game.collums &&
-                            !this.game.fields[newpos.Row, newpos.Collum].isopened)
+                        if (newpos.row > -1 && newpos.row < this.game.rows &&
+                            newpos.collumn > -1 && newpos.collumn < this.game.collumns &&
+                            !this.game.fields[newpos.row, newpos.collumn].isopened)
                         {
-                            this.game.fields[newpos.Row, newpos.Collum].Open();
+                            this.game.fields[newpos.row, newpos.collumn].Open();
                         }
                     }
                 }
@@ -208,13 +109,13 @@ namespace AknakeresőGUI
                     if (this.isflagged)
                     {
                         this.isflagged = false;
-                        this.pb.Image = new Bitmap("notopened.png");
+                        this.pb.Image = new Bitmap("img/notopened.png");
                         this.game.numberofflags++;
                     }
                     else if (this.game.numberofflags > 0)
                     {
                         this.isflagged = true;
-                        this.pb.Image = new Bitmap("flagged.png");
+                        this.pb.Image = new Bitmap("img/flagged.png");
                         this.game.numberofflags--;
                     }
                     this.game.flagsdispaly.Text = this.game.numberofflags.ToString();
@@ -223,45 +124,259 @@ namespace AknakeresőGUI
         }
         class Position
         {
-            public int Row;
-            public int Collum;
+            public int row;
+            public int collumn;
             public Position(int r, int c)
             {
-                this.Row = r;
-                this.Collum = c;
+                this.row = r;
+                this.collumn = c;
             }
-            public static Position operator +(Position a, Position b) => new Position(a.Row + b.Row, a.Collum + b.Collum);
+            public static Position operator +(Position a, Position b) => new Position(a.row + b.row, a.collumn + b.collumn);
         }
-        private void button1_Click(object sender, EventArgs e)
+        class Game
         {
-            int input1;
-            int input2;
-            int input3;
-            int input4;
-            if (int.TryParse(in1.Text, out input1) && !(input1 < 4))
-                if (int.TryParse(in2.Text, out input2) && !(input2 < 4))
-                    if (int.TryParse(in3.Text, out input3) && !(input3 < 4))
-                        if (int.TryParse(in4.Text, out input4) && !(input4 < 4))
-                        {
-                            in1.Dispose();
-                            in2.Dispose();
-                            in3.Dispose();
-                            in4.Dispose();
-                            pre1.Dispose();
-                            button1.Dispose();
-                            new Game(this, input1, input2, input3, input4);
-                        }
+            public Form1 form;
+            public Field[,] fields;
+            public int numberofflags;
+            public int numberofbombs;
+            public int rows;
+            public int collumns;
+            public int pixellength;
+            public Label flagsdispaly;
+            public Button newgamebutton;
+            public bool firstmove;
+
+            Label rowsLabel;
+            Label collumnsLabel;
+            Label bombsLabel;
+            Label pixelsLabel;
+
+            TextBox rowsTextBox;
+            TextBox collumnsTextBox;
+            TextBox bombsTextBox;
+            TextBox pixelsTextBox;
+            Button startbutton;
+
+            Button beginner;
+            void Beginner(object sender, EventArgs e)
+            {
+                rowsTextBox.Text = "10";
+                collumnsTextBox.Text = "10";
+                bombsTextBox.Text = "10";
+                pixelsTextBox.Text = "50";
+            }
+            Button intermediate;
+            void Intermediate(object sender, EventArgs e)
+            {
+                rowsTextBox.Text = "16";
+                collumnsTextBox.Text = "16";
+                bombsTextBox.Text = "26";
+                pixelsTextBox.Text = "50";
+            }
+
+            public Game(Form1 f)
+            {
+                this.form = f;
+                form.Size = new Size(320 + 16, 180 + 39);
+                #region
+                rowsLabel = new Label();
+                collumnsLabel = new Label();
+                bombsLabel = new Label();
+                pixelsLabel = new Label();
+
+                rowsLabel.Location = new Point(0, 0);
+                collumnsLabel.Location = new Point(0, 30);
+                bombsLabel.Location = new Point(0, 60);
+                pixelsLabel.Location = new Point(0, 90);
+
+                rowsLabel.Text = "rows";
+                collumnsLabel.Text = "collumns";
+                bombsLabel.Text = "bombs";
+                pixelsLabel.Text = "pixels";
+
+                rowsLabel.Font = new Font("Microsoft Sans Serif", 15F);
+                collumnsLabel.Font = new Font("Microsoft Sans Serif", 15F);
+                bombsLabel.Font = new Font("Microsoft Sans Serif", 15F);
+                pixelsLabel.Font = new Font("Microsoft Sans Serif", 15F);
+
+                rowsTextBox = new TextBox();
+                collumnsTextBox = new TextBox();
+                bombsTextBox = new TextBox();
+                pixelsTextBox = new TextBox();
+                startbutton = new Button();
+
+                form.Controls.Add(rowsTextBox);
+                form.Controls.Add(collumnsTextBox);
+                form.Controls.Add(bombsTextBox);
+                form.Controls.Add(pixelsTextBox);
+                form.Controls.Add(startbutton);
+
+                form.Controls.Add(rowsLabel);
+                form.Controls.Add(collumnsLabel);
+                form.Controls.Add(bombsLabel);
+                form.Controls.Add(pixelsLabel);
+
+                rowsTextBox.Location = new Point(100, 0);
+                collumnsTextBox.Location = new Point(100, 30);
+                bombsTextBox.Location = new Point(100, 60);
+                pixelsTextBox.Location = new Point(100, 90);
+
+                rowsTextBox.Size = new Size(100, 30);
+                collumnsTextBox.Size = new Size(100, 30);
+                bombsTextBox.Size = new Size(100, 30);
+                pixelsTextBox.Size = new Size(100, 30);
+
+                rowsTextBox.Font = new Font("Microsoft Sans Serif", 15F);
+                collumnsTextBox.Font = new Font("Microsoft Sans Serif", 15F);
+                bombsTextBox.Font = new Font("Microsoft Sans Serif", 15F);
+                pixelsTextBox.Font = new Font("Microsoft Sans Serif", 15F);
+
+                startbutton.Location = new Point(200, 0);
+                startbutton.Size = new Size(120, 120);
+                startbutton.Text = "Start";
+                startbutton.Click += Start;
+                #endregion
+                beginner = new Button();
+                intermediate = new Button();
+
+                beginner.Click += Beginner;
+                intermediate.Click += Intermediate;
+
+                beginner.Text = "Beginner";
+                intermediate.Text = "Intermediate";
+
+                beginner.Location = new Point(0,120);
+                intermediate.Location = new Point(0,150);
+
+                beginner.Size = new Size(320, 30);
+                intermediate.Size = new Size(320, 30);
+
+                form.Controls.Add(beginner);
+                form.Controls.Add(intermediate);
+            }
+
+            void Start(object sender, EventArgs e)
+            {
+                int r, c, b, p;
+                if (int.TryParse(rowsTextBox.Text, out r) && !(r < 4))
+                    if (int.TryParse(collumnsTextBox.Text, out c) && !(c < 4))
+                        if (int.TryParse(bombsTextBox.Text, out b) && !(b < 4))
+                            if (int.TryParse(pixelsTextBox.Text, out p) && !(p < 4))
+                            {
+                                rowsTextBox = null;
+                                collumnsTextBox = null;
+                                bombsTextBox = null;
+                                pixelsTextBox = null;
+                                startbutton = null;
+                                beginner = null;
+                                intermediate = null;
+                                form.Controls.Clear();
+                                Start(r, c, b, p);
+                            }
+                            else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
                         else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
                     else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
                 else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
-            else MessageBox.Show("Rossz input! Minden inputnak számnak kell lennie és legalább négynek");
-        }
-        private void pre1_Click(object sender, EventArgs e)
-        {
-            in1.Text = "10";
-            in2.Text = "10";
-            in3.Text = "10";
-            in4.Text = "50";
+            }
+
+            public void Start(int rows, int collumns, int numberofbombs, int pixellength)
+            {
+                this.rows = rows;
+                this.collumns = collumns;
+                this.fields = new Field[this.rows, this.collumns];
+                this.numberofbombs = numberofbombs;
+                this.numberofflags = this.numberofbombs;
+                this.pixellength = pixellength;
+                this.newgamebutton = new Button();
+                this.flagsdispaly = new Label();
+                this.firstmove = true;
+
+                form.Size = new Size(this.collumns * this.pixellength + 16, this.rows * this.pixellength + 39 + this.pixellength);
+                for (int i = 0; i < this.rows; i++)
+                    for (int j = 0; j < this.collumns; j++)
+                        this.fields[i, j] = new Field(this, form, new Position(i, j));
+
+                this.newgamebutton.Location = new Point(0, 0);
+                this.newgamebutton.Size = new Size(this.pixellength * 3, this.pixellength);
+                this.newgamebutton.Text = "New Game";
+                this.newgamebutton.Click += Newgamebuttonclick;
+                form.Controls.Add(this.newgamebutton);
+
+                this.flagsdispaly.Location = new Point(3 * this.pixellength, 0);
+                this.flagsdispaly.Size = new Size(this.pixellength * 3, this.pixellength);
+                this.flagsdispaly.Text = this.numberofflags.ToString();
+                form.Controls.Add(this.flagsdispaly);
+            }
+            public void Newgamebuttonclick(object sender, EventArgs e) 
+            {
+                fields = null;
+                flagsdispaly = null;
+                newgamebutton = null;
+                form.Controls.Clear();
+                form.New();
+            }
+            public void Over(bool won)
+            {
+                if (won) MessageBox.Show("nyertél");
+                else
+                {
+                    for (int i = 0; i < this.rows; i++)
+                        for (int j = 0; j < this.collumns; j++)
+                            if (this.fields[i, j].isbomb) this.fields[i, j].pb.Image = new Bitmap("img/bomb.png");
+                    MessageBox.Show("vesztettél");
+                }
+
+                for (int i = 0; i < this.rows; i++)
+                    for (int j = 0; j < this.collumns; j++)
+                        this.fields[i, j].Removeclick();
+            }
+            public void Check()
+            {
+                int sum = 0;
+                for (int i = 0; i < this.rows; i++)
+                    for (int j = 0; j < this.collumns; j++)
+                        if (!this.fields[i, j].isopened) sum++;
+                if (sum == this.numberofbombs) Over(true);
+            }
+            public void Putdownbombs(Position nothere)
+            {
+                Random random = new Random();
+                int c = 0;
+                while (c != numberofbombs)
+                {
+                    Position newpos = new Position(random.Next(rows), random.Next(collumns));
+                    if (!this.fields[newpos.row, newpos.collumn].isbomb)
+                    {
+                        if (nothere.row != newpos.row && nothere.collumn!= newpos.collumn)
+                        {
+                            this.fields[newpos.row, newpos.collumn].isbomb = true;
+                            c++;
+                        }
+                    }
+                }
+
+                List<Position> a = new List<Position>{
+                            new Position(-1,-1 ),
+                            new Position(-1, 0 ),
+                            new Position(-1,+1 ),
+                            new Position( 0,+1 ),
+                            new Position(+1,+1 ),
+                            new Position(+1, 0 ),
+                            new Position(+1,-1 ),
+                            new Position( 0,-1 )};
+                for (int i = 0; i < this.rows; i++)
+                    for (int j = 0; j < this.collumns; j++)
+                        for (int x = 0; x < 8; x++)
+                        {
+                            Position newpos = new Position(i + a[x].row, j + a[x].collumn);
+                            if (newpos.row > -1 && newpos.row < this.rows &&
+                                newpos.collumn > -1 && newpos.collumn < this.collumns &&
+                                this.fields[newpos.row, newpos.collumn].isbomb)
+                            {
+                                this.fields[i, j].numberofnearbybombs++;
+                            }
+                        }
+            }
         }
     }
 }
